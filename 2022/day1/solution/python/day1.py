@@ -1,8 +1,11 @@
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
 from typing import Sequence
 
 
 def get_all_calories_records_from_file(filename: str) -> Sequence[Sequence[int]]:
+    """
+    Retrieve the calories records from a file
+    """
     all_calories_records = []
     current_calories_records = []
 
@@ -21,20 +24,51 @@ def get_all_calories_records_from_file(filename: str) -> Sequence[Sequence[int]]
     return all_calories_records
 
 
-def get_command_line_arguments():
+def get_all_calories_records_from_input() -> Sequence[Sequence[int]]:
+    """
+    Retrieve the calories records from input
+    """
+    all_calories_records = []
+    current_calories_records = []
+    while True:
+        input_line = input()
+        # Both empty line and empty calories records signals that the input finished
+        if not input_line and not current_calories_records:
+            break
+
+        # Empty line signals that the records for the current elf has finished
+        elif not input_line:
+            all_calories_records.append(current_calories_records)
+            current_calories_records = []
+        else:
+            current_calories_records.append(int(input_line))
+
+    if not all_calories_records:
+        raise RuntimeError("No calories records where supplied!")
+
+    return all_calories_records
+
+
+def get_command_line_arguments() -> Namespace:
     parser = ArgumentParser()
-    parser.add_argument("input_file", default=None)
+    parser.add_argument(
+        "-f",
+        metavar="<input_filename>",
+        default=None,
+        dest="input_filename",
+        help="The file to read the calories records from",
+    )
     return parser.parse_args()
 
 
 def main():
     command_line_arguments = get_command_line_arguments()
 
-    if command_line_arguments.input_file is None:
-        pass
+    if command_line_arguments.input_filename is None:
+        elves_calories_records = get_all_calories_records_from_input()
     else:
         elves_calories_records = get_all_calories_records_from_file(
-            command_line_arguments.input_file
+            filename=command_line_arguments.input_filename
         )
 
     elves_calories_count = [
